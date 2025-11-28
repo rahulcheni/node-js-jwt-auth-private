@@ -1,0 +1,86 @@
+const express = require("express");
+const cors = require("cors");
+const morgan = require("morgan");
+const bodyParser = require("body-parser");
+const rfs = require("rotating-file-stream");
+const path = require("path");
+const fs = require("fs");
+
+const app = express();
+
+// Create logs directory if it doesn't exist
+const logsDirectory = "/var/log/reporting";
+if (!fs.existsSync(logsDirectory)) {
+  fs.mkdirSync(logsDirectory, { recursive: true });
+}
+
+// Set up rotating file stream for access logs
+const accessLogStream = rfs.createStream("access_%H.log", {
+  interval: "1h", // rotate hourly
+  path: logsDirectory,
+});
+
+// Set up rotating file stream for detailed logs
+const detailedLogStream = rfs.createStream("detailed_%H.log", {
+  interval: "1h", // rotate hourly
+  path: logsDirectory,
+});
+
+// Set up detailed logging middleware
+app.use(morgan("combined", { stream: accessLogStream }));
+app.use(bodyParser.json());
+
+// Custom logging middleware to log request details
+app.use((req, res, next) => {
+  const logEntry = {
+    timestamp: new Date().toISOString(),
+    method: req.method,
+    path: req.path,
+    query: req.query,
+    body: req.body,
+  };
+
+  detailedLogStream.write(JSON.stringify(logEntry) + "\n");
+
+  next();
+});
+
+var corsOptions = {
+  origin: "http://localhost:8081",
+};
+
+app.use(cors(corsOptions));
+app.use(express.urlencoded({ extended: true }));
+
+const db = require("./app/models");
+const Role = db.role;
+
+db.sequelize.sync();
+
+app.get("/", (req, res) => {
+  res.json({ message: "Welcome to ACUS Endpoint Reporting." });
+});
+
+// ... existing routes ...
+
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}.`);
+});
+
+function initial() {
+  Role.create({
+    id: 1,
+    name: "user",
+  });
+
+  Role.create({
+    id: 2,
+    name: "moderator",
+  });
+
+  Role.create({
+    id: 3,
+    name: "admin",
+  });
+}

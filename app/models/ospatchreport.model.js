@@ -1,0 +1,46 @@
+module.exports = (sequelize, Sequelize) => {
+  const OSPatch = sequelize.define("ospatchreport", {
+    id: {
+      allowNull: false,
+      autoIncrement: true,
+      primaryKey: true,
+      type: Sequelize.INTEGER,
+    },
+    DATE: {
+      type: Sequelize.DATE
+    },
+    HOSTNAME:{
+      type: Sequelize.STRING,
+      allowNull: false,
+      foreignKey: 'HOSTNAME'
+    },
+    AIRPORTID: {
+      type: Sequelize.CHAR
+    },
+    SERIALNO: {
+      type: Sequelize.STRING
+    },
+    JOBID: {
+      type: Sequelize.STRING
+    },
+    LATESTINSTALLEDOSPATCH: {
+      type: Sequelize.STRING
+    },
+    ALLINSTALLEDOSPATCHES: {
+      type: Sequelize.JSON
+    },
+    BULLETIN: {
+      type: Sequelize.STRING
+    }
+  },{
+    indexes: [
+      {
+        unique: true,
+        fields: ['HOSTNAME', 'SERIALNO', 'JOBID']
+      }
+    ]
+  });
+
+  return OSPatch;
+};
+

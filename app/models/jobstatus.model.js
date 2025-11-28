@@ -1,0 +1,43 @@
+module.exports = (sequelize, Sequelize) => {
+  const Jobstatus = sequelize.define("job_stat", {
+    id: {
+      allowNull: false,
+      autoIncrement: true,
+      primaryKey: true,
+      type: Sequelize.INTEGER,
+    },
+    DATE: {
+      type: Sequelize.DATE
+    },
+    HOSTNAME:{
+      type: Sequelize.STRING,
+      allowNull: false,
+      foreignKey: 'HOSTNAME'
+    },
+    AIRPORTID: {
+      type: Sequelize.CHAR
+    },
+    SERIALNO: {
+      type: Sequelize.STRING
+    },
+    JOBID: {
+      type: Sequelize.STRING
+    },
+    JOBSTATUS: {
+      type: Sequelize.CHAR
+    },
+    COMPLIANCESTATE: {
+      type: Sequelize.STRING
+    }
+  },{
+    indexes: [
+      {
+        unique: true,
+        fields: ['HOSTNAME', 'SERIALNO', 'JOBID']
+      }
+    ]
+  });
+
+  return Jobstatus;
+};
+
